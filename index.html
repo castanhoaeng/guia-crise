@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Guia de bolso · Gerenciamento de crise</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EEF1F2; --surface:#FFFFFF; --ink:#172229; --muted:#56646C; --line:#D3DADD;
+  --slab:#1F2F37; --slab-ink:#F3F6F7; --slab-muted:#A9BAC2;
+  --red:#C8102E; --green:#0B7D48; --yellow:#E8A800; --blue:#1D5FA8;
+  --on-red:#fff; --on-green:#fff; --on-yellow:#1F1A00; --on-blue:#fff;
+  --tint:.10;
+  --cond:"Barlow Condensed","Arial Narrow","Roboto Condensed",sans-serif;
+  --body:"Barlow","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  color-scheme:light dark;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E161A; --surface:#17232A; --ink:#E8EEF0; --muted:#98A7AE; --line:#2A3A43;
+    --slab:#0A1216; --slab-ink:#EEF3F5; --slab-muted:#8FA3AC;
+    --red:#FF5367; --green:#34C27E; --yellow:#F2C230; --blue:#62A2EC;
+    --on-red:#1A0004; --on-green:#00190C; --on-yellow:#1F1A00; --on-blue:#00132A;
+    --tint:.16;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E161A; --surface:#17232A; --ink:#E8EEF0; --muted:#98A7AE; --line:#2A3A43;
+  --slab:#0A1216; --slab-ink:#EEF3F5; --slab-muted:#8FA3AC;
+  --red:#FF5367; --green:#34C27E; --yellow:#F2C230; --blue:#62A2EC;
+  --on-red:#1A0004; --on-green:#00190C; --on-yellow:#1F1A00; --on-blue:#00132A;
+  --tint:.16;
+}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font:400 17px/1.45 var(--body);-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px;border-radius:6px}
+svg.ic{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+.app{max-width:560px;margin:0 auto;padding-bottom:calc(88px + env(safe-area-inset-bottom,0px))}
+.view{display:none}
+.view:target{display:block;animation:viewIn .25s ease-out}
+#ocorrencias{display:block}
+.view:target ~ #ocorrencias{display:none}
+.tile,.flowlink,.who-row,.pager a,.back,nav.tabs a,.dial a,.dial2 a{text-decoration:none;color:inherit}
+@keyframes viewIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* HERO */
+.hero{background:var(--slab);color:var(--slab-ink);padding:60px 20px 20px;border-radius:0 0 28px 28px}
+.hero small{display:block;color:var(--slab-muted);font-size:14px;letter-spacing:.01em}
+.hero h1{font:800 clamp(44px,13vw,64px)/.92 var(--cond);margin:10px 0 18px;letter-spacing:-.01em}
+.dial{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.dial a{display:flex;flex-direction:column;align-items:flex-start;gap:0;text-decoration:none;padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12)}
+.dial b{font:800 30px/1 var(--cond)}
+.dial span{font-size:13px;color:var(--slab-muted)}
+.dial a:active{transform:scale(.97)}
+
+/* RISCO */
+.risk{margin:16px 16px 0;background:var(--red);color:var(--on-red);border-radius:18px;padding:14px 16px}
+.risk p{margin:0 0 8px;font-weight:600;font-size:15px}
+.risk ol{list-style:none;margin:0;padding:0;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.risk li{font:800 21px/1 var(--cond);padding:6px 10px;border-radius:9px;background:rgba(0,0,0,.2);transition:opacity .3s,background .3s}
+.js #riskSeq li{opacity:.5}
+.js #riskSeq li.lit{opacity:1}
+.risk .arr{width:16px;height:16px;opacity:.8;flex:none}
+
+/* BUSCA */
+.search{margin:16px 16px 4px;position:relative;display:none}
+.js .search{display:block}
+.search input{width:100%;font:500 17px var(--body);padding:13px 14px 13px 44px;border-radius:14px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink)}
+.search input:focus{outline:none;border-color:var(--blue)}
+.search svg{position:absolute;left:14px;top:50%;width:20px;height:20px;transform:translateY(-50%);color:var(--muted)}
+
+/* ATALHO FLUXO */
+.flowlink{box-sizing:border-box;display:flex;align-items:center;gap:14px;margin:12px 16px 4px;padding:14px 16px;border-radius:18px;background:var(--surface);border:1.5px solid var(--line);width:calc(100% - 32px);text-align:left}
+.flowlink .dots{display:flex;gap:4px}
+.flowlink .dots i{width:7px;height:22px;border-radius:4px;background:var(--green);opacity:.25}
+.flowlink .dots i:nth-child(-n+3){opacity:1}
+.flowlink b{font:700 22px/1 var(--cond);display:block}
+.flowlink .txt span{display:block;color:var(--muted);font-size:14px;margin-top:3px}
+.flowlink .go{margin-left:auto;width:22px;height:22px;color:var(--muted)}
+
+/* GRUPOS */
+.group{margin:22px 16px 0}
+.group h2{display:flex;align-items:center;gap:8px;font:700 20px/1 var(--cond);margin:0 0 10px;color:var(--ink)}
+.group h2 i{width:12px;height:12px;border-radius:3px;background:var(--c)}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tile{position:relative;display:flex;flex-direction:column;gap:12px;align-items:flex-start;text-align:left;padding:14px;border-radius:18px;background:var(--surface);border:1.5px solid var(--line);min-height:128px;transition:transform .12s}
+.tile:active{transform:scale(.97)}
+.tile .sign{width:48px;height:48px;border-radius:12px;background:var(--c);color:var(--on);padding:10px}
+.tile b{font:700 20px/1.02 var(--cond)}
+.tile .n{position:absolute;top:12px;right:14px;font:600 14px var(--cond);color:var(--muted)}
+.tile .done{position:absolute;right:10px;bottom:10px;font-size:12px;font-weight:600;color:var(--c)}
+.empty{margin:28px 16px;color:var(--muted)}
+
+.topic{padding-bottom:40px}
+.sh-head{background:var(--c);color:var(--on);padding:58px 18px 22px;border-radius:0 0 28px 28px;position:relative;overflow:hidden}
+.sh-head .back{display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:16px;padding:8px 12px 8px 6px;border-radius:12px;background:rgba(0,0,0,.14)}
+.sh-head .back svg{width:20px;height:20px}
+.sh-head .big{position:absolute;right:-18px;top:70px;width:150px;height:150px;opacity:.2}
+.sh-head .big svg{stroke-width:1.6}
+.sh-head small{display:block;margin-top:18px;font-weight:600;opacity:.8}
+.sh-head h2{font:800 clamp(36px,10vw,48px)/.95 var(--cond);margin:4px 0 0;max-width:80%}
+.sub{font:700 20px/1 var(--cond);margin:18px 18px 8px}
+.steps{list-style:none;margin:6px 0 0;padding:0 18px}
+.step{display:flex;gap:14px;align-items:flex-start;padding:12px 0;font-size:17.5px;line-height:1.4;border-bottom:1px solid var(--line)}
+.step:last-child{border-bottom:0}
+.step .mk{flex:none;width:10px;height:10px;margin-top:8px;border-radius:3px;background:var(--c)}
+.rule{margin:20px 18px 0;padding:18px;border-radius:18px;border:2px solid var(--c);background:color-mix(in srgb,var(--c) calc(var(--tint)*100%),var(--surface));font:800 22px/1.1 var(--cond);display:flex;gap:12px;align-items:flex-start}
+.rule svg{flex:none;width:26px;height:26px;color:var(--c)}
+.who{margin:0 18px;display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:8px 12px;border-radius:999px;background:var(--surface);border:1.5px solid var(--line);font-size:15px;font-weight:500}
+.chip.opt{border-style:dashed;color:var(--muted)}
+.pager{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:26px 16px 0}
+.pager a,.pager i{display:flex;flex-direction:column;gap:2px;text-align:left;padding:12px 14px;border-radius:16px;background:var(--surface);border:1.5px solid var(--line);min-height:68px}
+.pager i{visibility:hidden}
+.pager a.nx{text-align:right;align-items:flex-end}
+.pager span{font-size:13px;color:var(--muted)}
+.pager b{font:700 18px/1.05 var(--cond)}
+.home-link{display:block;margin:12px 16px 0;padding:14px;border-radius:16px;text-align:center;font-weight:600;background:var(--surface);border:1.5px solid var(--line);text-decoration:none}
+
+/* FLUXO */
+.page-h{padding:62px 18px 4px}
+.page-h h1{font:800 44px/.95 var(--cond);margin:0}
+.page-h p{margin:8px 0 0;color:var(--muted)}
+.flow{list-style:none;margin:18px 16px 0;padding:0;position:relative}
+.flow::before{content:"";position:absolute;left:27px;top:24px;bottom:24px;width:3px;background:var(--line);border-radius:2px}
+.flow li{position:relative}
+.fstep{display:flex;align-items:center;gap:16px;padding:8px 0}
+.fstep .num{position:relative;z-index:1;flex:none;width:56px;height:56px;border-radius:50%;display:grid;place-items:center;background:var(--surface);border:3px solid var(--line);font:800 24px var(--cond);color:var(--muted);transition:all .25s}
+.fstep .w{font:800 30px/1 var(--cond);color:var(--muted);transition:color .25s;letter-spacing:.01em}
+.fstep.lit .num{border-color:var(--green);color:var(--green);transform:scale(1.06)}
+.fstep.lit .w{color:var(--ink)}
+.row-actions{display:flex;gap:10px;margin:18px 16px 0}
+.btn{padding:12px 16px;border-radius:14px;font-weight:600;border:1.5px solid var(--line);background:var(--surface)}
+.btn.pri{background:var(--green);color:var(--on-green);border-color:var(--green)}
+
+/* ACIONAR */
+.sec-h{font:700 26px/1 var(--cond);margin:28px 18px 12px}
+.dial2{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 16px 0}
+.dial2 a{text-decoration:none;border-radius:16px;padding:12px;background:var(--surface);border:1.5px solid var(--line);display:flex;flex-direction:column}
+.dial2 a b{font:800 34px/1 var(--cond)}
+.dial2 a:nth-child(1) b{color:var(--red)} .dial2 a:nth-child(2) b{color:var(--blue)} .dial2 a:nth-child(3) b{color:var(--green)}
+.dial2 span{font-size:14px;color:var(--muted)}
+.who-list{margin:0 16px;display:flex;flex-direction:column;gap:8px}
+.who-row{display:flex;gap:12px;align-items:flex-start;text-align:left;width:100%;padding:12px;border-radius:16px;background:var(--surface);border:1.5px solid var(--line)}
+.who-row .sign{flex:none;width:40px;height:40px;border-radius:10px;background:var(--c);color:var(--on);padding:8px}
+.who-row b{display:block;font:700 19px/1.1 var(--cond);margin-bottom:6px}
+.who-row .chips{display:flex;flex-wrap:wrap;gap:5px}
+.who-row .chip{padding:4px 9px;font-size:13.5px}
+
+.chain{list-style:none;margin:0 16px;padding:0;position:relative}
+.chain::before{content:"";position:absolute;left:19px;top:20px;bottom:20px;width:3px;background:var(--line)}
+.chain::after{content:"";position:absolute;left:15px;top:14px;width:11px;height:11px;border-radius:50%;background:var(--blue);box-shadow:0 0 0 5px color-mix(in srgb,var(--blue) 25%,transparent);animation:travel 4.5s cubic-bezier(.5,0,.5,1) infinite}
+@keyframes travel{0%{top:14px;opacity:0}8%{opacity:1}88%{opacity:1}100%{top:calc(100% - 26px);opacity:0}}
+.chain li{display:flex;align-items:center;gap:14px;padding:9px 0;position:relative;z-index:1}
+.chain .dot{flex:none;width:41px;height:41px;border-radius:50%;background:var(--surface);border:3px solid var(--line);display:grid;place-items:center;font:700 16px var(--cond);color:var(--muted)}
+.chain b{font:700 20px/1.05 var(--cond)}
+.chain em{display:block;font-style:normal;color:var(--muted);font-size:14px}
+.note{margin:12px 18px 0;color:var(--muted);font-size:15px}
+
+.brig{margin:0 16px;padding:18px;border-radius:20px;background:var(--surface);border:1.5px solid var(--line)}
+.brig p{margin:0 0 12px;color:var(--muted);font-size:15px}
+.brig ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.brig li{padding:10px 12px;border-radius:12px;background:var(--bg);font-weight:600;font-size:15px;line-height:1.25}
+.brig .lim{margin:14px 0 0;padding:12px 14px;border-radius:12px;background:var(--red);color:var(--on-red);font-weight:600;font-size:15px}
+
+/* PRINCÍPIOS */
+.first{margin:18px 16px 0;padding:22px 20px;border-radius:22px;background:var(--slab);color:var(--slab-ink)}
+.first span{font:600 15px var(--body);color:var(--slab-muted)}
+.first b{display:block;font:800 clamp(40px,12vw,56px)/.92 var(--cond);margin-top:6px}
+.plist{list-style:none;margin:10px 16px 0;padding:0;counter-reset:p 1}
+.plist li{counter-increment:p;display:flex;gap:14px;align-items:baseline;padding:14px 4px;border-bottom:1.5px solid var(--line);font-size:17px;font-weight:500}
+.plist li::before{content:counter(p,decimal-leading-zero);font:800 22px/1 var(--cond);color:var(--green);min-width:30px}
+
+/* NAV */
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:10;background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+nav.tabs .in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
+nav.tabs button{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px 10px;font-size:12.5px;font-weight:600;color:var(--muted)}
+nav.tabs button svg{width:24px;height:24px}
+nav.tabs button[aria-current="page"]{color:var(--ink)}
+nav.tabs button[aria-current="page"] svg{color:var(--green)}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .chain::after{display:none}
+}
+@media (min-width:480px){.tiles{grid-template-columns:1fr 1fr 1fr}}
+
+.js-only{display:none}.js .js-only{display:inline-block}
+nav.tabs a{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px;font-size:12.5px;font-weight:600;color:var(--muted)}
+nav.tabs a svg{width:24px;height:24px}
+nav.tabs a.here{color:var(--ink)}
+nav.tabs a.here svg{color:var(--green)}
+</style>
+</head>
+<body>
+<div class="app">
+
+<section class="view" id="fluxo" aria-label="Fluxo padrão">
+  <div class="page-h"><h1>Fluxo padrão</h1><p>Vale para toda ocorrência, nesta ordem.</p></div>
+  <ol class="flow" id="flow"><li class="fstep lit"><span class="num">1</span><span class="w">Identificar</span></li><li class="fstep lit"><span class="num">2</span><span class="w">Comunicar</span></li><li class="fstep lit"><span class="num">3</span><span class="w">Isolar</span></li><li class="fstep lit"><span class="num">4</span><span class="w">Proteger</span></li><li class="fstep lit"><span class="num">5</span><span class="w">Acionar</span></li><li class="fstep lit"><span class="num">6</span><span class="w">Controlar</span></li><li class="fstep lit"><span class="num">7</span><span class="w">Registrar</span></li><li class="fstep lit"><span class="num">8</span><span class="w">Encerrar</span></li></ol>
+  <div class="row-actions"><button class="btn pri js-only" id="replay">Repassar a sequência</button></div>
+  <div class="risk" role="note"><p>Dúvida ou risco elevado</p><ol><li>Isolar</li><svg class="ic arr" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg><li>Proteger</li><svg class="ic arr" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg><li>Acionar o especialista</li></ol></div>
+</section>
+
+<section class="view" id="acionar" aria-label="Quem acionar">
+  <div class="page-h"><h1>Quem acionar</h1><p>Toque numa ocorrência para abrir o procedimento.</p></div>
+  <div class="dial2"><a href="tel:193"><b>193</b><span>Bombeiros</span></a><a href="tel:190"><b>190</b><span>Polícia Militar</span></a><a href="tel:192"><b>192</b><span>SAMU</span></a></div>
+  <h2 class="sec-h">Por ocorrência</h2>
+  <div class="who-list"><a class="who-row" href="#o-spk" style="--c:var(--red);--on:var(--on-red)"><span class="sign"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4h8M12 4v4M6 8h12l-2.5 3h-7z"/><path d="M12 14v3M8 14l-1.5 2.5M16 14l1.5 2.5M5 12.5 3 14M19 12.5l2 1.5M12 20v.5"/></svg></span><span><b>Sprinkler estourado</b><span class="chips"><span class="chip">Bombeiro Civil</span><span class="chip">Manutenção</span><span class="chip">Operações</span></span></span></a><a class="who-row" href="#o-fogo" style="--c:var(--red);--on:var(--on-red)"><span class="sign"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c1 3.2 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3-1-5.5 1-8.5z"/></svg></span><span><b>Princípio de incêndio</b><span class="chips"><span class="chip">Bombeiro Civil</span><span class="chip">Brigada</span><span class="chip">193</span><span class="chip">Fluxo interno</span></span></span></a><a class="who-row" href="#o-agua" style="--c:var(--red);--on:var(--on-red)"><span class="sign"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 8q2.5-2.5 5 0t5 0 5 0 5 0M2 13q2.5-2.5 5 0t5 0 5 0 5 0M2 18q2.5-2.5 5 0t5 0 5 0 5 0"/></svg></span><span><b>Alagamento</b><span class="chips"><span class="chip">Manutenção</span><span class="chip">Bombeiro Civil</span><span class="chip">Brigada</span><span class="chip">Operações</span><span class="chip">Kit Crise</span></span></span></a><a class="who-row" href="#o-convulsao" style="--c:var(--green);--on:var(--on-green)"><span class="sign"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="16" r="2"/><path d="M8 16h8l3 3M13 16l2-2"/><path d="M6 9l2-2 2 2 2-2 2 2 2-2 2 2"/></svg></span><span><b>Convulsão no mall</b><span class="chips"><span class="chip">Bombeiro Civil</span><span class="chip">SOS</span><span class="chip">Coordenador de Mall</span></span></span></a><a class="who-row" href="#o-pcr" style="--c:var(--green);--on:var(--on-green)"><span class="sign"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/><path d="M7.5 12H10l1.2-2 1.8 4 1.2-2h2.3"/></svg></span><span><b>Parada cardiorrespiratória (PCR)</b><span class="chips"><span class="chip">Bombeiro Civil</span><span class="chip">SOS</span><span class="chip">Coordenador de Mall</span></span></span></a><a class="who-row" href="#o-teto" style="--c:var(--yellow);--on:var(--on-yellow)"><span class="sign"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h18M7 4v2.5l3 1M14 4l-.8 2 1.8 1"/><path d="M9 12l3 .8-.8 3-3-.8zM15 16l2 .5-.5 2-2-.5zM6 18.5l1.5.3-.3 1.5-1.5-.3z"/></svg></span><span><b>Teto, forro ou gesso desabando</b><span class="chips"><span class="chip">Bombeiro Civil</span><span class="chip">Manutenção</span><span class="chip">Coordenador de Mall</span><span class="chip opt">Consultor, se nec.</span></span></span></a><a class="who-row" href="#o-elevador" style="--c:var(--yellow);--on:var(--on-yellow)"><span class="sign"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M9 10l3-3 3 3M9 14l3 3 3-3"/></svg></span><span><b>Pessoas presas em elevador</b><span class="chips"><span class="chip">Plantonista/S-2</span><span class="chip">Bombeiro Civil</span><span class="chip">Empresa de manutenção</span><span class="chip opt">SOS/SAMU, se nec.</span></span></span></a><a class="who-row" href="#o-briga" style="--c:var(--blue);--on:var(--on-blue)"><span class="sign"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="7" r="2.2"/><circle cx="18" cy="7" r="2.2"/><path d="M3 20v-3.5a3 3 0 0 1 6 0V20M15 20v-3.5a3 3 0 0 1 6 0V20M13 9l-2.2 3.2h2.4L11 16"/></svg></span><span><b>Briga generalizada</b><span class="chips"><span class="chip">Segurança/S-2</span><span class="chip">Fluxo interno</span><span class="chip opt">SOS, se nec.</span><span class="chip opt">PM, se nec.</span></span></span></a><a class="who-row" href="#o-assalto" style="--c:var(--blue);--on:var(--on-blue)"><span class="sign"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V6z"/><path d="M12 8v5M12 16.3v.2"/></svg></span><span><b>Assalto à mão armada</b><span class="chips"><span class="chip">Segurança/S-2</span><span class="chip">Fluxo interno</span><span class="chip opt">PM, se nec.</span></span></span></a><a class="who-row" href="#o-preconceito" style="--c:var(--blue);--on:var(--on-blue)"><span class="sign"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="8" r="2.6"/><circle cx="16" cy="8" r="2.6"/><path d="M3 20a5 5 0 0 1 10 0M11 20a5 5 0 0 1 10 0"/></svg></span><span><b>Preconceito ou discriminação</b><span class="chips"><span class="chip">Segurança</span><span class="chip">Administração</span><span class="chip">Assistente Social de apoio</span><span class="chip opt">PM, se nec.</span></span></span></a></div>
+  <h2 class="sec-h">Comunicação interna</h2>
+  <ol class="chain">
+    <li><span class="dot">1</span><span><b>Ocorrência</b></span></li>
+    <li><span class="dot">2</span><span><b>Plantonista / S-2</b></span></li>
+    <li><span class="dot">3</span><span><b>Bombeiro Civil</b></span></li>
+    <li><span class="dot">4</span><span><b>Brigada Voluntária</b><em>se necessário</em></span></li>
+    <li><span class="dot">5</span><span><b>Especialista da área</b></span></li>
+    <li><span class="dot">6</span><span><b>Administração, Gerência, Assessoria</b></span></li>
+    <li><span class="dot">7</span><span><b>Órgão externo</b><em>quando necessário</em></span></li>
+  </ol>
+  <p class="note">Objetivo: informação rápida, correta e dentro da competência de cada área.</p>
+  <h2 class="sec-h">Brigada Voluntária</h2>
+  <div class="brig">
+    <p>Mobilização conforme avaliação inicial e Plano de Emergência. Atuar dentro dos limites de treinamento e atribuições.</p>
+    <ul><li>Isolamento</li><li>Controle de fluxo</li><li>Apoio à evacuação</li><li>Proteção de áreas de risco</li><li>Apoio às equipes especializadas</li><li>Equipamentos do Kit Crise</li></ul>
+    <p class="lim">A Brigada não substitui Bombeiro Civil, SOS, SAMU, Polícia, Manutenção, Engenharia, empresa especializada ou outros profissionais habilitados.</p>
+  </div>
+</section>
+
+<section class="view" id="principios" aria-label="Princípios">
+  <div class="page-h"><h1>Princípios</h1><p>Para todas as ocorrências.</p></div>
+  <div class="first"><span>Princípio 01</span><b>Vida em primeiro lugar.</b></div>
+  <ol class="plist"><li>Não expor funcionário ou terceiro a risco desnecessário.</li><li>Respeitar a dignidade de todas as pessoas.</li><li>Agir dentro do treinamento e das atribuições.</li><li>Acionar o especialista correto rapidamente.</li><li>Isolar precocemente áreas de risco.</li><li>Não agravar a crise por ação improvisada.</li><li>Preservar evidências e o local.</li><li>Comunicar fatos, não boatos ou julgamentos.</li><li>Registrar todas as providências.</li><li>Utilizar EPI/EPC adequados ao risco.</li><li>Respeitar e proteger todas as pessoas.</li><li>Acionar a Brigada precocemente quando necessário.</li><li>Nunca colocar o patrimônio acima da vida.</li></ol>
+</section>
+
+<section class="view topic" id="o-spk" style="--c:var(--red);--on:var(--on-red)" aria-labelledby="h-spk">
+  <div class="sh-head">
+    <a class="back" href="#ocorrencias"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>Ocorrências</a>
+    <div class="big"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4h8M12 4v4M6 8h12l-2.5 3h-7z"/><path d="M12 14v3M8 14l-1.5 2.5M16 14l1.5 2.5M5 12.5 3 14M19 12.5l2 1.5M12 20v.5"/></svg></div>
+    <small>Ocorrência 02 · Fogo e água</small>
+    <h2 id="h-spk">Sprinkler estourado</h2>
+  </div>
+  <div class="rule"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.5 20h19z"/><path d="M12 10v4.5M12 17.3v.2"/></svg><span>Não transformar vazamento em risco elétrico, estrutural ou perda de proteção.</span></div>
+  <h3 class="sub">Quem acionar</h3>
+  <div class="who"><span class="chip">Bombeiro Civil</span><span class="chip">Manutenção</span><span class="chip">Operações</span></div>
+  <h3 class="sub">O que fazer</h3>
+  <ul class="steps"><li class="step"><span class="mk"></span><span>Comunicar Plantonista/S-2 e Bombeiro Civil</span></li><li class="step"><span class="mk"></span><span>Isolar a área molhada e avaliar risco elétrico</span></li><li class="step"><span class="mk"></span><span>Desligar energia somente por pessoa autorizada quando houver risco</span></li><li class="step"><span class="mk"></span><span>Afastar pessoas de risco elétrico, queda de forro ou escorregamento</span></li><li class="step"><span class="mk"></span><span>Identificar origem/extensão e acionar Manutenção/Operações</span></li><li class="step"><span class="mk"></span><span>Preservar a proteção contra incêndio das demais áreas</span></li><li class="step"><span class="mk"></span><span>Registrar danos, fotos, horários e eventual indisponibilidade</span></li><li class="step"><span class="mk"></span><span>Restabelecer o sistema somente após correção</span></li></ul>
+  
+  <div class="pager">
+    <i></i>
+    <a class="nx" href="#o-fogo"><span>Próxima</span><b>Princípio de incêndio</b></a>
+  </div>
+  <a class="home-link" href="#ocorrencias">Ver todas as ocorrências</a>
+</section>
+<section class="view topic" id="o-fogo" style="--c:var(--red);--on:var(--on-red)" aria-labelledby="h-fogo">
+  <div class="sh-head">
+    <a class="back" href="#ocorrencias"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>Ocorrências</a>
+    <div class="big"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c1 3.2 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3-1-5.5 1-8.5z"/></svg></div>
+    <small>Ocorrência 06 · Fogo e água</small>
+    <h2 id="h-fogo">Princípio de incêndio</h2>
+  </div>
+  <div class="rule"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.5 20h19z"/><path d="M12 10v4.5M12 17.3v.2"/></svg><span>Patrimônio nunca deve ser colocado acima da vida.</span></div>
+  <h3 class="sub">Quem acionar</h3>
+  <div class="who"><span class="chip">Bombeiro Civil</span><span class="chip">Brigada</span><span class="chip">193</span><span class="chip">Fluxo interno</span></div>
+  <h3 class="sub">O que fazer</h3>
+  <ul class="steps"><li class="step"><span class="mk"></span><span>Identificar a origem sem colocar a equipe em risco</span></li><li class="step"><span class="mk"></span><span>Acionar imediatamente Bombeiro Civil</span></li><li class="step"><span class="mk"></span><span>Acionar Brigada para isolamento/apoio</span></li><li class="step"><span class="mk"></span><span>Acionar alarme quando aplicável e avaliar evacuação</span></li><li class="step"><span class="mk"></span><span>Combater somente se equipe treinada, equipada e houver condições seguras</span></li><li class="step"><span class="mk"></span><span>Utilizar extintor adequado ao tipo de incêndio</span></li><li class="step"><span class="mk"></span><span>Manter rotas de fuga livres</span></li><li class="step"><span class="mk"></span><span>Acionar 193 quando necessário e registrar a ocorrência</span></li></ul>
+  
+  <div class="pager">
+    <a href="#o-spk"><span>Anterior</span><b>Sprinkler estourado</b></a>
+    <a class="nx" href="#o-agua"><span>Próxima</span><b>Alagamento</b></a>
+  </div>
+  <a class="home-link" href="#ocorrencias">Ver todas as ocorrências</a>
+</section>
+<section class="view topic" id="o-agua" style="--c:var(--red);--on:var(--on-red)" aria-labelledby="h-agua">
+  <div class="sh-head">
+    <a class="back" href="#ocorrencias"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>Ocorrências</a>
+    <div class="big"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 8q2.5-2.5 5 0t5 0 5 0 5 0M2 13q2.5-2.5 5 0t5 0 5 0 5 0M2 18q2.5-2.5 5 0t5 0 5 0 5 0"/></svg></div>
+    <small>Ocorrência 07 · Fogo e água</small>
+    <h2 id="h-agua">Alagamento</h2>
+  </div>
+  <div class="rule"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.5 20h19z"/><path d="M12 10v4.5M12 17.3v.2"/></svg><span>Nunca permitir intervenção elétrica sem capacitação/autorização.</span></div>
+  <h3 class="sub">Quem acionar</h3>
+  <div class="who"><span class="chip">Manutenção</span><span class="chip">Bombeiro Civil</span><span class="chip">Brigada</span><span class="chip">Operações</span><span class="chip">Kit Crise</span></div>
+  <h3 class="sub">O que fazer</h3>
+  <ul class="steps"><li class="step"><span class="mk"></span><span>Isolar a área e identificar a origem da água</span></li><li class="step"><span class="mk"></span><span>Avaliar risco de choque elétrico</span></li><li class="step"><span class="mk"></span><span>Utilizar EPC para isolamento e EPI adequado</span></li><li class="step"><span class="mk"></span><span>Acionar Manutenção</span></li><li class="step"><span class="mk"></span><span>Impedir acesso até avaliação profissional se houver risco elétrico</span></li><li class="step"><span class="mk"></span><span>Proteger pessoas e áreas críticas; evitar piso escorregadio</span></li><li class="step"><span class="mk"></span><span>Avaliar risco de queda de forro</span></li><li class="step"><span class="mk"></span><span>Registrar danos e preservar evidências</span></li></ul>
+  
+  <div class="pager">
+    <a href="#o-fogo"><span>Anterior</span><b>Princípio de incêndio</b></a>
+    <a class="nx" href="#o-convulsao"><span>Próxima</span><b>Convulsão no mall</b></a>
+  </div>
+  <a class="home-link" href="#ocorrencias">Ver todas as ocorrências</a>
+</section>
+<section class="view topic" id="o-convulsao" style="--c:var(--green);--on:var(--on-green)" aria-labelledby="h-convulsao">
+  <div class="sh-head">
+    <a class="back" href="#ocorrencias"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>Ocorrências</a>
+    <div class="big"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="16" r="2"/><path d="M8 16h8l3 3M13 16l2-2"/><path d="M6 9l2-2 2 2 2-2 2 2 2-2 2 2"/></svg></div>
+    <small>Ocorrência 03 · Saúde</small>
+    <h2 id="h-convulsao">Convulsão no mall</h2>
+  </div>
+  <div class="rule"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.5 20h19z"/><path d="M12 10v4.5M12 17.3v.2"/></svg><span>Atendimento conforme treinamento e protocolo institucional.</span></div>
+  <h3 class="sub">Quem acionar</h3>
+  <div class="who"><span class="chip">Bombeiro Civil</span><span class="chip">SOS</span><span class="chip">Coordenador de Mall</span></div>
+  <h3 class="sub">O que fazer</h3>
+  <ul class="steps"><li class="step"><span class="mk"></span><span>Manter a calma e proteger a pessoa contra impactos</span></li><li class="step"><span class="mk"></span><span>Afastar objetos perigosos e curiosos</span></li><li class="step"><span class="mk"></span><span>Não segurar à força e não colocar objetos/dedos na boca</span></li><li class="step"><span class="mk"></span><span>Não oferecer água, alimentos ou medicamentos durante a crise</span></li><li class="step"><span class="mk"></span><span>Acionar Bombeiro Civil/Brigada treinada e SOS; SAMU quando necessário</span></li><li class="step"><span class="mk"></span><span>Controlar o fluxo e preservar a privacidade</span></li><li class="step"><span class="mk"></span><span>Após a crise, manter a pessoa segura e observar seu estado</span></li><li class="step"><span class="mk"></span><span>Não divulgar informações sobre a condição da pessoa</span></li></ul>
+  
+  <div class="pager">
+    <a href="#o-agua"><span>Anterior</span><b>Alagamento</b></a>
+    <a class="nx" href="#o-pcr"><span>Próxima</span><b>Parada cardiorrespiratória (PCR)</b></a>
+  </div>
+  <a class="home-link" href="#ocorrencias">Ver todas as ocorrências</a>
+</section>
+<section class="view topic" id="o-pcr" style="--c:var(--green);--on:var(--on-green)" aria-labelledby="h-pcr">
+  <div class="sh-head">
+    <a class="back" href="#ocorrencias"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>Ocorrências</a>
+    <div class="big"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/><path d="M7.5 12H10l1.2-2 1.8 4 1.2-2h2.3"/></svg></div>
+    <small>Ocorrência 04 · Saúde</small>
+    <h2 id="h-pcr">Parada cardiorrespiratória (PCR)</h2>
+  </div>
+  <div class="rule"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.5 20h19z"/><path d="M12 10v4.5M12 17.3v.2"/></svg><span>Quem não estiver treinado deve buscar ajuda e seguir as orientações do serviço de emergência.</span></div>
+  <h3 class="sub">Quem acionar</h3>
+  <div class="who"><span class="chip">Bombeiro Civil</span><span class="chip">SOS</span><span class="chip">Coordenador de Mall</span></div>
+  <h3 class="sub">O que fazer</h3>
+  <ul class="steps"><li class="step"><span class="mk"></span><span>Comunicar imediatamente o código de emergência interno</span></li><li class="step"><span class="mk"></span><span>Acionar SOS, Bombeiro Civil e equipe treinada</span></li><li class="step"><span class="mk"></span><span>Acionar SAMU quando necessário</span></li><li class="step"><span class="mk"></span><span>Buscar o DEA imediatamente, se disponível</span></li><li class="step"><span class="mk"></span><span>Iniciar RCP conforme treinamento e utilizar DEA conforme instruções/capacitação</span></li><li class="step"><span class="mk"></span><span>Controlar fluxo e manter espaço para atendimento</span></li><li class="step"><span class="mk"></span><span>Preparar acesso para SOS/SAMU</span></li><li class="step"><span class="mk"></span><span>Registrar horários de identificação, acionamento e chegada do socorro</span></li></ul>
+  
+  <div class="pager">
+    <a href="#o-convulsao"><span>Anterior</span><b>Convulsão no mall</b></a>
+    <a class="nx" href="#o-teto"><span>Próxima</span><b>Teto, forro ou gesso desabando</b></a>
+  </div>
+  <a class="home-link" href="#ocorrencias">Ver todas as ocorrências</a>
+</section>
+<section class="view topic" id="o-teto" style="--c:var(--yellow);--on:var(--on-yellow)" aria-labelledby="h-teto">
+  <div class="sh-head">
+    <a class="back" href="#ocorrencias"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>Ocorrências</a>
+    <div class="big"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h18M7 4v2.5l3 1M14 4l-.8 2 1.8 1"/><path d="M9 12l3 .8-.8 3-3-.8zM15 16l2 .5-.5 2-2-.5zM6 18.5l1.5.3-.3 1.5-1.5-.3z"/></svg></div>
+    <small>Ocorrência 05 · Estrutura e equipamentos</small>
+    <h2 id="h-teto">Teto, forro ou gesso desabando</h2>
+  </div>
+  <div class="rule"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.5 20h19z"/><path d="M12 10v4.5M12 17.3v.2"/></svg><span>Não permitir intervenção improvisada.</span></div>
+  <h3 class="sub">Quem acionar</h3>
+  <div class="who"><span class="chip">Bombeiro Civil</span><span class="chip">Manutenção</span><span class="chip">Coordenador de Mall</span><span class="chip opt">Consultor, se necessário</span></div>
+  <h3 class="sub">O que fazer</h3>
+  <ul class="steps"><li class="step"><span class="mk"></span><span>Isolar imediatamente a área</span></li><li class="step"><span class="mk"></span><span>Retirar pessoas da zona de risco sem se colocar em perigo</span></li><li class="step"><span class="mk"></span><span>Acionar Bombeiro Civil, Manutenção/Engenharia e Brigada Voluntária</span></li><li class="step"><span class="mk"></span><span>Avaliar possibilidade de novos desprendimentos</span></li><li class="step"><span class="mk"></span><span>Se houver vítima: SOS/SAMU; não movimentar salvo perigo imediato</span></li><li class="step"><span class="mk"></span><span>Se houver risco elétrico: somente Manutenção autorizada</span></li><li class="step"><span class="mk"></span><span>Liberar somente após avaliação da equipe competente/técnica</span></li><li class="step"><span class="mk"></span><span>Registrar causa aparente, área, danos, providências e horários</span></li></ul>
+  
+  <div class="pager">
+    <a href="#o-pcr"><span>Anterior</span><b>Parada cardiorrespiratória (PCR)</b></a>
+    <a class="nx" href="#o-elevador"><span>Próxima</span><b>Pessoas presas em elevador</b></a>
+  </div>
+  <a class="home-link" href="#ocorrencias">Ver todas as ocorrências</a>
+</section>
+<section class="view topic" id="o-elevador" style="--c:var(--yellow);--on:var(--on-yellow)" aria-labelledby="h-elevador">
+  <div class="sh-head">
+    <a class="back" href="#ocorrencias"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>Ocorrências</a>
+    <div class="big"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M9 10l3-3 3 3M9 14l3 3 3-3"/></svg></div>
+    <small>Ocorrência 11 · Estrutura e equipamentos</small>
+    <h2 id="h-elevador">Pessoas presas em elevador</h2>
+  </div>
+  <div class="rule"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.5 20h19z"/><path d="M12 10v4.5M12 17.3v.2"/></svg><span>Nunca colocar a vida do passageiro ou do resgatista em risco para acelerar a retirada.</span></div>
+  <h3 class="sub">Quem acionar</h3>
+  <div class="who"><span class="chip">Plantonista/S-2</span><span class="chip">Bombeiro Civil</span><span class="chip">Empresa de manutenção</span><span class="chip opt">SOS/SAMU, se necessário</span></div>
+  <h3 class="sub">Primeiro atendimento</h3>
+  <ul class="steps"><li class="step"><span class="mk"></span><span>Comunicar Plantonista/S-2 e Bombeiro Civil</span></li><li class="step"><span class="mk"></span><span>Identificar elevador, localização e quantidade de pessoas</span></li><li class="step"><span class="mk"></span><span>Manter comunicação e transmitir calma</span></li><li class="step"><span class="mk"></span><span>Orientar a não abrir portas ou sair por conta própria</span></li><li class="step"><span class="mk"></span><span>Acionar imediatamente a empresa responsável pela manutenção</span></li><li class="step"><span class="mk"></span><span>Avaliar SOS/SAMU quando necessário</span></li><li class="step"><span class="mk"></span><span>Dar atenção especial a pessoas vulneráveis ou com mal-estar</span></li><li class="step"><span class="mk"></span><span>Isolar a área e controlar o fluxo</span></li></ul>
+  <h3 class="sub">Resgate e pós-ocorrência</h3><ul class="steps"><li class="step"><span class="mk"></span><span>Abertura, nivelamento, movimentação ou resgate: equipe técnica autorizada/profissional habilitado</span></li><li class="step"><span class="mk"></span><span>Não forçar portas ou utilizar métodos improvisados</span></li><li class="step"><span class="mk"></span><span>Em risco à vida, acionar órgãos de emergência competentes</span></li><li class="step"><span class="mk"></span><span>Manter área livre para equipe especializada</span></li><li class="step"><span class="mk"></span><span>Após retirada: avaliar necessidade de atendimento médico</span></li><li class="step"><span class="mk"></span><span>Registrar horários e anormalidades</span></li><li class="step"><span class="mk"></span><span>Preservar CFTV</span></li><li class="step"><span class="mk"></span><span>Manter equipamento fora de operação quando houver suspeita de falha e liberar somente com autorização técnica</span></li></ul>
+  <div class="pager">
+    <a href="#o-teto"><span>Anterior</span><b>Teto, forro ou gesso desabando</b></a>
+    <a class="nx" href="#o-briga"><span>Próxima</span><b>Briga generalizada</b></a>
+  </div>
+  <a class="home-link" href="#ocorrencias">Ver todas as ocorrências</a>
+</section>
+<section class="view topic" id="o-briga" style="--c:var(--blue);--on:var(--on-blue)" aria-labelledby="h-briga">
+  <div class="sh-head">
+    <a class="back" href="#ocorrencias"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>Ocorrências</a>
+    <div class="big"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="7" r="2.2"/><circle cx="18" cy="7" r="2.2"/><path d="M3 20v-3.5a3 3 0 0 1 6 0V20M15 20v-3.5a3 3 0 0 1 6 0V20M13 9l-2.2 3.2h2.4L11 16"/></svg></div>
+    <small>Ocorrência 08 · Segurança e pessoas</small>
+    <h2 id="h-briga">Briga generalizada</h2>
+  </div>
+  <div class="rule"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.5 20h19z"/><path d="M12 10v4.5M12 17.3v.2"/></svg><span>Segurança e contenção, não confronto desnecessário.</span></div>
+  <h3 class="sub">Quem acionar</h3>
+  <div class="who"><span class="chip">Segurança/S-2</span><span class="chip">Fluxo interno</span><span class="chip opt">SOS, se necessário</span><span class="chip opt">PM, se necessário</span></div>
+  <h3 class="sub">O que fazer</h3>
+  <ul class="steps"><li class="step"><span class="mk"></span><span>Comunicar Segurança/S-2/Plantonista e acionar reforço</span></li><li class="step"><span class="mk"></span><span>Separar e controlar a área dentro das atribuições</span></li><li class="step"><span class="mk"></span><span>Retirar terceiros do local</span></li><li class="step"><span class="mk"></span><span>Avaliar presença de armas; acionar 190 se houver risco grave</span></li><li class="step"><span class="mk"></span><span>Acionar SOS se houver feridos</span></li><li class="step"><span class="mk"></span><span>Evitar intervenção física além do necessário e permitido</span></li><li class="step"><span class="mk"></span><span>Identificar testemunhas e preservar CFTV</span></li><li class="step"><span class="mk"></span><span>Registrar os fatos objetivamente</span></li></ul>
+  
+  <div class="pager">
+    <a href="#o-elevador"><span>Anterior</span><b>Pessoas presas em elevador</b></a>
+    <a class="nx" href="#o-assalto"><span>Próxima</span><b>Assalto à mão armada</b></a>
+  </div>
+  <a class="home-link" href="#ocorrencias">Ver todas as ocorrências</a>
+</section>
+<section class="view topic" id="o-assalto" style="--c:var(--blue);--on:var(--on-blue)" aria-labelledby="h-assalto">
+  <div class="sh-head">
+    <a class="back" href="#ocorrencias"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>Ocorrências</a>
+    <div class="big"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V6z"/><path d="M12 8v5M12 16.3v.2"/></svg></div>
+    <small>Ocorrência 09 · Segurança e pessoas</small>
+    <h2 id="h-assalto">Assalto à mão armada</h2>
+  </div>
+  <div class="rule"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.5 20h19z"/><path d="M12 10v4.5M12 17.3v.2"/></svg><span>Prioridade: vida.</span></div>
+  <h3 class="sub">Quem acionar</h3>
+  <div class="who"><span class="chip">Segurança/S-2</span><span class="chip">Fluxo interno</span><span class="chip opt">PM, se necessário</span></div>
+  <h3 class="sub">O que fazer</h3>
+  <ul class="steps"><li class="step"><span class="mk"></span><span>Prioridade: vida</span></li><li class="step"><span class="mk"></span><span>Não reagir de forma que aumente desnecessariamente o risco</span></li><li class="step"><span class="mk"></span><span>Manter calma conforme treinamento</span></li><li class="step"><span class="mk"></span><span>Não perseguir criminosos colocando terceiros em risco</span></li><li class="step"><span class="mk"></span><span>Acionar 190 assim que for seguro e comunicar S-2/Plantonista</span></li><li class="step"><span class="mk"></span><span>Preservar CFTV e o local; evitar tocar em objetos relacionados ao crime</span></li><li class="step"><span class="mk"></span><span>Identificar testemunhas sem expô-las</span></li><li class="step"><span class="mk"></span><span>Apoiar a chegada da Polícia e não divulgar informações indevidamente</span></li></ul>
+  
+  <div class="pager">
+    <a href="#o-briga"><span>Anterior</span><b>Briga generalizada</b></a>
+    <a class="nx" href="#o-preconceito"><span>Próxima</span><b>Preconceito ou discriminação</b></a>
+  </div>
+  <a class="home-link" href="#ocorrencias">Ver todas as ocorrências</a>
+</section>
+<section class="view topic" id="o-preconceito" style="--c:var(--blue);--on:var(--on-blue)" aria-labelledby="h-preconceito">
+  <div class="sh-head">
+    <a class="back" href="#ocorrencias"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>Ocorrências</a>
+    <div class="big"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="8" r="2.6"/><circle cx="16" cy="8" r="2.6"/><path d="M3 20a5 5 0 0 1 10 0M11 20a5 5 0 0 1 10 0"/></svg></div>
+    <small>Ocorrência 10 · Segurança e pessoas</small>
+    <h2 id="h-preconceito">Preconceito ou discriminação</h2>
+  </div>
+  <div class="rule"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.5 20h19z"/><path d="M12 10v4.5M12 17.3v.2"/></svg><span>Preservar a privacidade dos envolvidos.</span></div>
+  <h3 class="sub">Quem acionar</h3>
+  <div class="who"><span class="chip">Segurança</span><span class="chip">Administração</span><span class="chip">Assistente Social de apoio</span><span class="chip opt">PM, se necessário</span></div>
+  <h3 class="sub">O que fazer</h3>
+  <ul class="steps"><li class="step"><span class="mk"></span><span>Preservar a segurança e separar envolvidos se houver risco</span></li><li class="step"><span class="mk"></span><span>Ouvir cada pessoa individualmente</span></li><li class="step"><span class="mk"></span><span>Tratar todos com respeito e dignidade</span></li><li class="step"><span class="mk"></span><span>Não fazer julgamento público nem constranger a suposta vítima</span></li><li class="step"><span class="mk"></span><span>Identificar testemunhas e preservar CFTV</span></li><li class="step"><span class="mk"></span><span>Registrar fatos objetivos, sem adjetivações</span></li><li class="step"><span class="mk"></span><span>Acionar Segurança/Plantonista e Administração/área responsável</span></li><li class="step"><span class="mk"></span><span>Se houver ameaça/agressão/possível crime, encaminhar às autoridades competentes</span></li></ul>
+  
+  <div class="pager">
+    <a href="#o-assalto"><span>Anterior</span><b>Assalto à mão armada</b></a>
+    <i></i>
+  </div>
+  <a class="home-link" href="#ocorrencias">Ver todas as ocorrências</a>
+</section>
+
+<section class="view" id="ocorrencias" aria-label="Ocorrências">
+  <header class="hero">
+    <small>Guia de bolso do gerenciamento de crise do shopping</small>
+    <h1>Vida em primeiro lugar.</h1>
+    <div class="dial"><a href="tel:193"><b>193</b><span>Bombeiros</span></a><a href="tel:190"><b>190</b><span>Polícia</span></a><a href="tel:192"><b>192</b><span>SAMU</span></a></div>
+  </header>
+  <div class="risk" role="note"><p>Dúvida ou risco elevado</p><ol id="riskSeq"><li>Isolar</li><svg class="ic arr" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg><li>Proteger</li><svg class="ic arr" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg><li>Acionar o especialista</li></ol></div>
+  <div class="search">
+    <svg class="ic" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+    <input id="q" type="search" placeholder="Buscar ocorrência" aria-label="Buscar ocorrência" autocomplete="off">
+  </div>
+  <a class="flowlink" href="#fluxo">
+    <span class="dots" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+    <span class="txt"><b>Fluxo padrão</b><span>8 passos para toda ocorrência</span></span>
+    <svg class="ic go" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
+  </a>
+  <div id="groups"><div class="group" style="--c:var(--red);--on:var(--on-red)"><h2><i></i>Fogo e água</h2><div class="tiles"><a class="tile" href="#o-spk" data-s="sprinkler estourado comunicar plantonista/s-2 e bombeiro civil isolar a area molhada e avaliar risco eletrico desligar energia somente por pessoa autorizada quando houver risco afastar pessoas de risco eletrico, queda de forro ou escorregamento identificar origem/extensao e acionar manutencao/operacoes preservar a protecao contra incendio das demais areas registrar danos, fotos, horarios e eventual indisponibilidade restabelecer o sistema somente apos correcao  bombeiro civil manutencao operacoes"><span class="n">02</span><span class="sign"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4h8M12 4v4M6 8h12l-2.5 3h-7z"/><path d="M12 14v3M8 14l-1.5 2.5M16 14l1.5 2.5M5 12.5 3 14M19 12.5l2 1.5M12 20v.5"/></svg></span><b>Sprinkler estourado</b></a><a class="tile" href="#o-fogo" data-s="principio de incendio identificar a origem sem colocar a equipe em risco acionar imediatamente bombeiro civil acionar brigada para isolamento/apoio acionar alarme quando aplicavel e avaliar evacuacao combater somente se equipe treinada, equipada e houver condicoes seguras utilizar extintor adequado ao tipo de incendio manter rotas de fuga livres acionar 193 quando necessario e registrar a ocorrencia  bombeiro civil brigada 193 fluxo interno"><span class="n">06</span><span class="sign"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c1 3.2 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3-1-5.5 1-8.5z"/></svg></span><b>Princípio de incêndio</b></a><a class="tile" href="#o-agua" data-s="alagamento isolar a area e identificar a origem da agua avaliar risco de choque eletrico utilizar epc para isolamento e epi adequado acionar manutencao impedir acesso ate avaliacao profissional se houver risco eletrico proteger pessoas e areas criticas; evitar piso escorregadio avaliar risco de queda de forro registrar danos e preservar evidencias  manutencao bombeiro civil brigada operacoes kit crise"><span class="n">07</span><span class="sign"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 8q2.5-2.5 5 0t5 0 5 0 5 0M2 13q2.5-2.5 5 0t5 0 5 0 5 0M2 18q2.5-2.5 5 0t5 0 5 0 5 0"/></svg></span><b>Alagamento</b></a></div></div><div class="group" style="--c:var(--green);--on:var(--on-green)"><h2><i></i>Saúde</h2><div class="tiles"><a class="tile" href="#o-convulsao" data-s="convulsao no mall manter a calma e proteger a pessoa contra impactos afastar objetos perigosos e curiosos nao segurar a forca e nao colocar objetos/dedos na boca nao oferecer agua, alimentos ou medicamentos durante a crise acionar bombeiro civil/brigada treinada e sos; samu quando necessario controlar o fluxo e preservar a privacidade apos a crise, manter a pessoa segura e observar seu estado nao divulgar informacoes sobre a condicao da pessoa  bombeiro civil sos coordenador de mall"><span class="n">03</span><span class="sign"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="16" r="2"/><path d="M8 16h8l3 3M13 16l2-2"/><path d="M6 9l2-2 2 2 2-2 2 2 2-2 2 2"/></svg></span><b>Convulsão no mall</b></a><a class="tile" href="#o-pcr" data-s="parada cardiorrespiratoria (pcr) comunicar imediatamente o codigo de emergencia interno acionar sos, bombeiro civil e equipe treinada acionar samu quando necessario buscar o dea imediatamente, se disponivel iniciar rcp conforme treinamento e utilizar dea conforme instrucoes/capacitacao controlar fluxo e manter espaco para atendimento preparar acesso para sos/samu registrar horarios de identificacao, acionamento e chegada do socorro  bombeiro civil sos coordenador de mall"><span class="n">04</span><span class="sign"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/><path d="M7.5 12H10l1.2-2 1.8 4 1.2-2h2.3"/></svg></span><b>Parada cardiorrespiratória (PCR)</b></a></div></div><div class="group" style="--c:var(--yellow);--on:var(--on-yellow)"><h2><i></i>Estrutura e equipamentos</h2><div class="tiles"><a class="tile" href="#o-teto" data-s="teto, forro ou gesso desabando isolar imediatamente a area retirar pessoas da zona de risco sem se colocar em perigo acionar bombeiro civil, manutencao/engenharia e brigada voluntaria avaliar possibilidade de novos desprendimentos se houver vitima: sos/samu; nao movimentar salvo perigo imediato se houver risco eletrico: somente manutencao autorizada liberar somente apos avaliacao da equipe competente/tecnica registrar causa aparente, area, danos, providencias e horarios  bombeiro civil manutencao coordenador de mall"><span class="n">05</span><span class="sign"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h18M7 4v2.5l3 1M14 4l-.8 2 1.8 1"/><path d="M9 12l3 .8-.8 3-3-.8zM15 16l2 .5-.5 2-2-.5zM6 18.5l1.5.3-.3 1.5-1.5-.3z"/></svg></span><b>Teto, forro ou gesso desabando</b></a><a class="tile" href="#o-elevador" data-s="pessoas presas em elevador comunicar plantonista/s-2 e bombeiro civil identificar elevador, localizacao e quantidade de pessoas manter comunicacao e transmitir calma orientar a nao abrir portas ou sair por conta propria acionar imediatamente a empresa responsavel pela manutencao avaliar sos/samu quando necessario dar atencao especial a pessoas vulneraveis ou com mal-estar isolar a area e controlar o fluxo abertura, nivelamento, movimentacao ou resgate: equipe tecnica autorizada/profissional habilitado nao forcar portas ou utilizar metodos improvisados em risco a vida, acionar orgaos de emergencia competentes manter area livre para equipe especializada apos retirada: avaliar necessidade de atendimento medico registrar horarios e anormalidades preservar cftv manter equipamento fora de operacao quando houver suspeita de falha e liberar somente com autorizacao tecnica plantonista/s-2 bombeiro civil empresa de manutencao"><span class="n">11</span><span class="sign"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M9 10l3-3 3 3M9 14l3 3 3-3"/></svg></span><b>Pessoas presas em elevador</b></a></div></div><div class="group" style="--c:var(--blue);--on:var(--on-blue)"><h2><i></i>Segurança e pessoas</h2><div class="tiles"><a class="tile" href="#o-briga" data-s="briga generalizada comunicar seguranca/s-2/plantonista e acionar reforco separar e controlar a area dentro das atribuicoes retirar terceiros do local avaliar presenca de armas; acionar 190 se houver risco grave acionar sos se houver feridos evitar intervencao fisica alem do necessario e permitido identificar testemunhas e preservar cftv registrar os fatos objetivamente  seguranca/s-2 fluxo interno"><span class="n">08</span><span class="sign"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="7" r="2.2"/><circle cx="18" cy="7" r="2.2"/><path d="M3 20v-3.5a3 3 0 0 1 6 0V20M15 20v-3.5a3 3 0 0 1 6 0V20M13 9l-2.2 3.2h2.4L11 16"/></svg></span><b>Briga generalizada</b></a><a class="tile" href="#o-assalto" data-s="assalto a mao armada prioridade: vida nao reagir de forma que aumente desnecessariamente o risco manter calma conforme treinamento nao perseguir criminosos colocando terceiros em risco acionar 190 assim que for seguro e comunicar s-2/plantonista preservar cftv e o local; evitar tocar em objetos relacionados ao crime identificar testemunhas sem expo-las apoiar a chegada da policia e nao divulgar informacoes indevidamente  seguranca/s-2 fluxo interno"><span class="n">09</span><span class="sign"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V6z"/><path d="M12 8v5M12 16.3v.2"/></svg></span><b>Assalto à mão armada</b></a><a class="tile" href="#o-preconceito" data-s="preconceito ou discriminacao preservar a seguranca e separar envolvidos se houver risco ouvir cada pessoa individualmente tratar todos com respeito e dignidade nao fazer julgamento publico nem constranger a suposta vitima identificar testemunhas e preservar cftv registrar fatos objetivos, sem adjetivacoes acionar seguranca/plantonista e administracao/area responsavel se houver ameaca/agressao/possivel crime, encaminhar as autoridades competentes  seguranca administracao assistente social de apoio"><span class="n">10</span><span class="sign"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="8" r="2.6"/><circle cx="16" cy="8" r="2.6"/><path d="M3 20a5 5 0 0 1 10 0M11 20a5 5 0 0 1 10 0"/></svg></span><b>Preconceito ou discriminação</b></a></div></div></div>
+  <p class="empty" id="empty" hidden>Nenhuma ocorrência com esse termo. Tente outra palavra, como “elétrico” ou “CFTV”.</p>
+</section>
+</div>
+
+<nav class="tabs" aria-label="Seções"><div class="in">
+  <a class="here" href="#ocorrencias"><svg class="ic" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg>Ocorrências</a>
+  <a href="#fluxo"><svg class="ic" viewBox="0 0 24 24"><circle cx="6" cy="5" r="2"/><circle cx="6" cy="12" r="2"/><circle cx="6" cy="19" r="2"/><path d="M11 5h9M11 12h9M11 19h9"/></svg>Fluxo</a>
+  <a href="#acionar"><svg class="ic" viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a1 1 0 0 1-1 1A16 16 0 0 1 4 5a1 1 0 0 1 1-1z"/></svg>Acionar</a>
+  <a href="#principios"><svg class="ic" viewBox="0 0 24 24"><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/></svg>Princípios</a>
+</div></nav>
+
+<script>
+(function(){
+  try{
+    document.documentElement.classList.add('js');
+    var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // busca
+    var q=document.getElementById('q');
+    q.addEventListener('input',function(){
+      var f=q.value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim(), any=false;
+      document.querySelectorAll('#groups .group').forEach(function(g){
+        var vis=0;
+        g.querySelectorAll('.tile').forEach(function(t){var ok=!f||t.dataset.s.indexOf(f)>-1;t.style.display=ok?'':'none';if(ok)vis++;});
+        g.style.display=vis?'':'none'; if(vis) any=true;
+      });
+      document.getElementById('empty').hidden=any;
+    });
+    // regra de risco acende ao abrir
+    var li=document.querySelectorAll('#riskSeq li');
+    li.forEach(function(l,i){ setTimeout(function(){l.classList.add('lit');}, reduce?0:400+i*380); });
+    // repassar fluxo
+    document.getElementById('replay').addEventListener('click',function(){
+      var s=document.querySelectorAll('#flow .fstep');
+      s.forEach(function(x){x.classList.remove('lit');});
+      s.forEach(function(x,i){ setTimeout(function(){x.classList.add('lit');}, reduce?0:150+i*230); });
+    });
+    // aba ativa (reserva para aparelhos sem :has)
+    function mark(){
+      var h=location.hash||'#ocorrencias', tab=/^#o-/.test(h)?'#ocorrencias':h;
+      document.querySelectorAll('nav.tabs a').forEach(function(a){a.classList.toggle('here',a.getAttribute('href')===tab);});
+    }
+    window.addEventListener('hashchange',function(){mark();window.scrollTo(0,0);}); mark();
+  }catch(e){ document.documentElement.classList.remove('js'); }
+})();
+</script>
+</body>
+</html>
